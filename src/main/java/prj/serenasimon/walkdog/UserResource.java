@@ -18,7 +18,7 @@ public class UserResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIt() {
-        return Response.ok().build();
+        return Response.ok("OKOK").build();
     }
 
     @POST

@@ -31,6 +31,9 @@ public class User implements Serializable {
     @Column(name = "cover")
     private URL cover;
 
+    public User() {
+    }
+
     public User(Long id, String name, String firstname, String lastname, Integer agerange, URL link, URL picture, URL cover) {
         super();
         this.id = id;

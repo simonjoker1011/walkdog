@@ -3,9 +3,13 @@
 <head>
 <title>Facebook Login JavaScript Example</title>
 <meta charset="UTF-8">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 </head>
 <body>
 <script>
+  var host='http://localhost:8081/walkdog';
+  var userApiPrefix='/p1/user';
+
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
     console.log('statusChangeCallback');
@@ -17,7 +21,7 @@
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
       console.log('Welcome!  Fetching your information.... ');
-      FB.api('/me', function(response) {
+      FB.api('/me',{fields: 'id,cover,name,first_name,last_name,age_range,link,email,picture,updated_time'}, function(response) {
         console.log('Successful login for: ' + response.name);
         document.getElementById('status').innerHTML =
           'Thanks for logging in, ' + response.name + '!';
@@ -50,12 +54,43 @@
             FB.logout(function(response) {
               statusChangeCallback(response);
             });
+
+            FB.api('/me',{fields: 'id,cover,name,first_name,last_name,age_range,link,email,picture,updated_time'}, function(response) {
+              console.log(response);
+            });
+
           }else{
             console.log('start to login');
 
             FB.login(function(response) {
-              statusChangeCallback(response);
+              statusChangeCallback(response);               
+
+              FB.api('/me',{fields: 'id,cover,name,first_name,last_name,age_range,link,email,picture,updated_time'},   function(response) {
+                // console.log(response);
+                var resp = $.ajax({
+                  type: "POST",
+                  url: host+userApiPrefix,
+                  data:{
+                    id: response.id,
+                    name: response.name,
+                    firstname: response.first_name,
+                    lastname: response.last_name,
+                    agerange: response.age_range.min,
+                    link: response.link,
+                    picture: response.picture.data.url,
+                    cover: response.cover.source 
+                  },
+                  async: false,
+                  contentType: "application/x-www-form-urlencoded",
+                  dataType: 'json'
+                }).responseJSON;
+
+                console.log(resp);
+              });
             });
+
+
+
           };
     });
   }

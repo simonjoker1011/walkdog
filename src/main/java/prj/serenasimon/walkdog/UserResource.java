@@ -34,13 +34,12 @@ public class UserResource {
         @FormParam("lastname") String lastname,
         @FormParam("agerange") Integer agerange,
         @FormParam("link") String link,
-        @FormParam("picture") String picture,
-        @FormParam("cover") String cover) {
+        @FormParam("picture") String picture) {
 
-        System.out.println(id + "\n " + name + "\n " + firstname + "\n " + lastname + "\n " + agerange + "\n " + link + "\n " + picture + "\n " + cover);
+        System.out.println(id + "\n " + name + "\n " + firstname + "\n " + lastname + "\n " + agerange + "\n " + link + "\n " + picture + "\n ");
         User user = new User();
         try {
-            user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture), new URL(cover));
+            user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture));
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

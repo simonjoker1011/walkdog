@@ -28,13 +28,11 @@ public class User implements Serializable {
     private URL link;
     @Column(name = "picture")
     private URL picture;
-    @Column(name = "cover")
-    private URL cover;
 
     public User() {
     }
 
-    public User(Long id, String name, String firstname, String lastname, Integer agerange, URL link, URL picture, URL cover) {
+    public User(Long id, String name, String firstname, String lastname, Integer agerange, URL link, URL picture) {
         super();
         this.id = id;
         this.name = name;
@@ -43,7 +41,6 @@ public class User implements Serializable {
         this.agerange = agerange;
         this.link = link;
         this.picture = picture;
-        this.cover = cover;
     }
 
     public Long getId() {
@@ -100,14 +97,6 @@ public class User implements Serializable {
 
     public void setPicture(URL picture) {
         this.picture = picture;
-    }
-
-    public URL getCover() {
-        return cover;
-    }
-
-    public void setCover(URL cover) {
-        this.cover = cover;
     }
 
 }

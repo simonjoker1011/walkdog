@@ -6,30 +6,52 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import prj.serenasimon.cache.ChatCache;
+
 public class ChatServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ChatServer.class);
+
+    private static UUID serverID;
     private int port;
     private InetAddress addr;
     private int socketTimeout;
+    private ServerSocket serverSocket;
+    private Set<String> participants;
 
     public ChatServer() {
-        this.run();
-    }
+        try {
+            serverSocket = create();
 
-    public static void main(String[] args) throws InterruptedException {
-        new ChatServer();
+            setServerID(UUID.randomUUID());
+            setPort(serverSocket.getLocalPort());
+            setAddr(serverSocket.getInetAddress());
+            setSocketTimeout(serverSocket.getSoTimeout());
+            setParticipants(new HashSet<String>());
+            logger.info("Init Server Socket; ID:{}, Addr: {}, Port: {}, Timeout: {}", getServerID(), serverSocket.getInetAddress(), serverSocket.getLocalPort(),
+                serverSocket.getSoTimeout());
+
+            ChatCache.getChatServer().put(getServerID(), this);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        Thread thread = new Thread(this);
+        thread.start();
     }
 
     public static ServerSocket create() throws IOException {
         for (int i = 1; i <= 65535; i++) {
             try {
                 ServerSocket socket = new ServerSocket(i);
-                socket.setSoTimeout(30 * 1000);
                 return socket;
             } catch (IOException ex) {
                 continue; // try next port
@@ -43,12 +65,6 @@ public class ChatServer implements Runnable {
     @Override
     public void run() {
         try {
-            ServerSocket serverSocket = create();
-            setPort(serverSocket.getLocalPort());
-            setAddr(serverSocket.getInetAddress());
-            setSocketTimeout(serverSocket.getSoTimeout());
-
-            logger.info("Init Server Socket, Addr: {}, Port: {}, Timeout: {}", serverSocket.getInetAddress(), serverSocket.getLocalPort(), serverSocket.getSoTimeout());
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
@@ -62,6 +78,7 @@ public class ChatServer implements Runnable {
                     }
                 }
             }
+
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -93,4 +110,25 @@ public class ChatServer implements Runnable {
     public void setSocketTimeout(int socketTimeout) {
         this.socketTimeout = socketTimeout;
     }
+
+    public UUID getServerID() {
+        return serverID;
+    }
+
+    public void setServerID(UUID serverID) {
+        ChatServer.serverID = serverID;
+    }
+
+    public static void main(String[] args) throws InterruptedException, IOException {
+        new ChatServer();
+    }
+
+    public Set<String> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(Set<String> participants) {
+        this.participants = participants;
+    }
+
 }

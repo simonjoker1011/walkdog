@@ -12,11 +12,16 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import prj.serenasimon.datas.User;
 
 @Path("user")
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
+
+    private static final Logger logger = LogManager.getLogger(UserResource.class);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -36,7 +41,10 @@ public class UserResource {
         @FormParam("link") String link,
         @FormParam("picture") String picture) {
 
-        System.out.println(id + "\n " + name + "\n " + firstname + "\n " + lastname + "\n " + agerange + "\n " + link + "\n " + picture + "\n ");
+        logger.info("\n ID: {} \n Name: {} \n Firstname: {} \n Lastname: {} \n Agerange: {}, \n Link: {} \n Picture: {}", id, name, firstname, lastname, agerange, link, picture);
+        // System.out.println(id + "\n " + name + "\n " + firstname + "\n " + lastname + "\n " + agerange + "\n " + link + "\n "
+        // + picture + "\n ");
+
         User user = new User();
         try {
             user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture));

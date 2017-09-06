@@ -1,11 +1,10 @@
 package prj.serenasimon.socket;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -18,12 +17,15 @@ import prj.serenasimon.cache.ChatCache;
 public class ChatServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ChatServer.class);
+    private static final int SERVER_TIME_OUT = 10 * 1000; // in milliseconds
+    private static final int CLIENT_TIME_OUT = 10 * 1000; // in milliseconds
 
-    private static UUID serverID;
+    private UUID serverID;
     private int port;
     private InetAddress addr;
     private int socketTimeout;
     private ServerSocket serverSocket;
+    private Set<UUID> clientIDs;
     private Set<String> participants;
 
     public ChatServer() {
@@ -35,6 +37,7 @@ public class ChatServer implements Runnable {
             setAddr(serverSocket.getInetAddress());
             setSocketTimeout(serverSocket.getSoTimeout());
             setParticipants(new HashSet<String>());
+            setClientIDs(new HashSet<UUID>());
             logger.info("Init Server Socket; ID:{}, Addr: {}, Port: {}, Timeout: {}", getServerID(), serverSocket.getInetAddress(), serverSocket.getLocalPort(),
                 serverSocket.getSoTimeout());
 
@@ -43,46 +46,58 @@ public class ChatServer implements Runnable {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
 
+    public void launch() {
+        logger.info("ChatServer launch...");
         Thread thread = new Thread(this);
         thread.start();
     }
 
-    public static ServerSocket create() throws IOException {
+    public ServerSocket create() throws IOException {
         for (int i = 1; i <= 65535; i++) {
             try {
                 ServerSocket socket = new ServerSocket(i);
+                socket.setSoTimeout(SERVER_TIME_OUT);
                 return socket;
             } catch (IOException ex) {
                 continue; // try next port
             }
         }
-
         // if the program gets here, no port in the range was found
         throw new IOException("no free port found");
     }
 
     @Override
     public void run() {
-        try {
-
-            while (true) {
+        while (true) {
+            try {
                 Socket clientSocket = serverSocket.accept();
                 logger.info("Current Client: {}.{}", clientSocket.getLocalAddress(), clientSocket.getLocalPort());
-                while (true) {
-                    try {
-                        DataInputStream s = new DataInputStream(clientSocket.getInputStream());
-                        logger.info("Msg: {}", new String(s.readUTF()));
-                    } catch (EOFException e) {
-                        break;
-                    }
-                }
-            }
 
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
+                Conversation conversation = new Conversation(getServerID(), clientSocket);
+                conversation.launch();
+
+                ChatCache.getConversations().put(getServerID(), conversation);
+            } catch (SocketTimeoutException e) {
+                e.printStackTrace();
+                logger.warn("Server Socket Timeout reached...");
+                break;
+                // if (getParticipants().size() < 1) {
+                // break;
+                // } else {
+                // try {
+                // serverSocket.setSoTimeout(SERVER_TIME_OUT);
+                // continue;
+                // } catch (SocketException e1) {
+                // e1.printStackTrace();
+                // break;
+                // }
+                // }
+            } catch (IOException e) {
+                e.printStackTrace();
+                break;
+            }
 
         }
     }
@@ -116,7 +131,7 @@ public class ChatServer implements Runnable {
     }
 
     public void setServerID(UUID serverID) {
-        ChatServer.serverID = serverID;
+        this.serverID = serverID;
     }
 
     public static void main(String[] args) throws InterruptedException, IOException {
@@ -129,6 +144,14 @@ public class ChatServer implements Runnable {
 
     public void setParticipants(Set<String> participants) {
         this.participants = participants;
+    }
+
+    public Set<UUID> getClientIDs() {
+        return clientIDs;
+    }
+
+    public void setClientIDs(Set<UUID> clientIDs) {
+        this.clientIDs = clientIDs;
     }
 
 }

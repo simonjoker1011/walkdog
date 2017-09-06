@@ -6,10 +6,13 @@ import java.util.UUID;
 
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
+import prj.serenasimon.socket.Conversation;
 
 public class ChatCache {
+
     private static volatile Map<UUID, ChatServer> chatServer;
     private static volatile Map<UUID, ChatClient> chatClient;
+    private static volatile Map<UUID, Conversation> conversations;
 
     static {
         initCache();
@@ -18,6 +21,7 @@ public class ChatCache {
     private static void initCache() {
         setChatServer(new HashMap<UUID, ChatServer>());
         setChatClient(new HashMap<UUID, ChatClient>());
+        setConversations(new HashMap<UUID, Conversation>());
     }
 
     public static Map<UUID, ChatServer> getChatServer() {
@@ -35,4 +39,13 @@ public class ChatCache {
     public static void setChatClient(Map<UUID, ChatClient> chatClient) {
         ChatCache.chatClient = chatClient;
     }
+
+    public static Map<UUID, Conversation> getConversations() {
+        return conversations;
+    }
+
+    public static void setConversations(Map<UUID, Conversation> conversations) {
+        ChatCache.conversations = conversations;
+    }
+
 }

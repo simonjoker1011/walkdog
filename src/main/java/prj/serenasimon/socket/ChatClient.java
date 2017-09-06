@@ -15,58 +15,39 @@ public class ChatClient {
 
     private static final Logger logger = LogManager.getLogger(ChatClient.class);
 
-    private static UUID serverID;
-    private static UUID clientID;
-    private static Socket socket;
-    private static InetAddress addr;
-    private static int port;
-    private static String participant;
+    private UUID serverID;
+    private UUID clientID;
+    private Socket socket;
+    private InetAddress addr;
+    private int port;
+    private String participant;
 
-    public ChatClient(UUID serverID, InetAddress addr, int port) throws IOException {
-        logger.info("Init client...");
+    public ChatClient(ChatServer server) throws IOException {
 
-        setServerID(serverID);
         setClientID(UUID.randomUUID());
-        setPort(port);
-        setAddr(addr);
+        setServerID(server.getServerID());
+        setPort(server.getPort());
+        setAddr(server.getAddr());
 
-        socket = new Socket(addr, port);
+        setSocket(new Socket(addr, port));
         logger.info("connect to server/client: {}/{}", serverID, clientID);
-        logger.info("getInetAddress: {}, getLocalAddress: {}, getPort: {}", socket.getInetAddress(), socket.getLocalAddress(), socket.getPort());
-        // createClient();
+        logger.info("getInetAddress: {}, getLocalAddress: {}, getPort: {}", getSocket().getInetAddress(), getSocket().getLocalAddress(), getSocket().getPort());
 
         ChatCache.getChatClient().put(getClientID(), this);
     }
 
-    public void createClient() throws IOException {
-        logger.info("Init client: ");
-        socket = null;
-        try {
-            socket = new Socket(addr, port);
-            logger.info("getInetAddress: {}, getLocalAddress: {}, getPort: {}", socket.getInetAddress(), socket.getLocalAddress(), socket.getPort());
-            DataOutputStream s = new DataOutputStream(socket.getOutputStream());
-            for (int i = 0; i < 10; i++) {
-                String msg = Double.toString(Math.random());
-                logger.info("Message Sent: {}", msg);
-                s.writeUTF(msg);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            if (socket != null) {
-                socket.close();
-            }
-        }
-
-    }
+    // public void launchConversation() {
+    // Conversation conversation = new Conversation(getServerID(), clientSocket);
+    // conversation.launch();
+    //
+    // ChatCache.getConversations().put(conversation.getConversationID(), conversation);
+    // }
 
     public void sendMessage(String content) throws IOException {
-        DataOutputStream s = new DataOutputStream(socket.getOutputStream());
+        DataOutputStream s = new DataOutputStream(getSocket().getOutputStream());
         logger.info("Message Sent: {}", content);
 
         s.writeUTF(content);
-
     }
 
     public int getPort() {
@@ -74,7 +55,7 @@ public class ChatClient {
     }
 
     public void setPort(int port) {
-        ChatClient.port = port;
+        this.port = port;
     }
 
     public InetAddress getAddr() {
@@ -82,7 +63,7 @@ public class ChatClient {
     }
 
     public void setAddr(InetAddress addr) {
-        ChatClient.addr = addr;
+        this.addr = addr;
     }
 
     public UUID getClientID() {
@@ -90,7 +71,7 @@ public class ChatClient {
     }
 
     public void setClientID(UUID clientID) {
-        ChatClient.clientID = clientID;
+        this.clientID = clientID;
     }
 
     public UUID getServerID() {
@@ -98,7 +79,7 @@ public class ChatClient {
     }
 
     public void setServerID(UUID serverID) {
-        ChatClient.serverID = serverID;
+        this.serverID = serverID;
     }
 
     public static void main(String[] args) throws IOException {
@@ -110,6 +91,14 @@ public class ChatClient {
     }
 
     public void setParticipant(String participant) {
-        ChatClient.participant = participant;
+        this.participant = participant;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
     }
 }

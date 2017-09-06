@@ -8,9 +8,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -34,37 +32,41 @@ public class ChatResource {
 
     @POST
     @Path("createChatroom")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createChatroom(
-        @QueryParam("userid") String userid) throws IOException {
+        @FormParam("userid") String userid) throws IOException {
 
         ChatServer server = new ChatServer();
         server.getParticipants().add(userid);
+        server.launch();
 
-        ChatServer serverInCache = ChatCache.getChatServer().get(server.getServerID());
-        ChatClient client = new ChatClient(server.getServerID(), serverInCache.getAddr(), serverInCache.getPort());
+        ChatClient client = new ChatClient(server);
         client.setParticipant(userid);
 
         String JsonResponse = new JSONObject()
-            .put("serverid", serverInCache.getServerID())
-            .put("address", serverInCache.getAddr())
-            .put("port", serverInCache.getPort())
+            .put("serverid", server.getServerID())
+            .put("address", server.getAddr())
+            .put("port", server.getPort())
             .put("clientid", client.getClientID())
-            .put("participant", client.getParticipant()).toString();
+            .put("participant", client.getParticipant())
+            .toString();
 
         return Response.ok(JsonResponse).build();
     }
 
     @POST
-    @Path("joinChatroom/{chatroomid}")
+    @Path("joinChatroom")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response joinChatroom(
-        @PathParam("chatroomid") UUID chatroomid,
-        @QueryParam("userid") String userid) throws IOException {
+        @FormParam("chatroomid") UUID chatroomid,
+        @FormParam("userid") String userid) throws IOException {
 
         ChatServer server = ChatCache.getChatServer().get(chatroomid);
         server.getParticipants().add(userid);
-        ChatClient client = new ChatClient(server.getServerID(), server.getAddr(), server.getPort());
+
+        ChatClient client = new ChatClient(server);
         client.setParticipant(userid);
 
         String JsonResponse = new JSONObject()
@@ -77,20 +79,36 @@ public class ChatResource {
     }
 
     @POST
-    @Path("terminalChatroom/{chatroomid}")
+    @Path("terminateChatroom")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response terminalChatroom(
-        @PathParam("chatroomid") UUID chatroomid) {
-        return Response.ok("Terminal ChatRoom done").build();
+    public Response terminateChatroom(
+        @FormParam("chatroomid") UUID chatroomid) {
+        return Response.ok("Terminate Chatroom done").build();
     }
 
     @POST
-    @Path("sendMessage/{serverid}/{clientid}")
+    @Path("exitChatroom")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response exitChatroom(
+        @FormParam("clientid") UUID clientid,
+        @FormParam("userid") String userid) {
+
+        ChatClient chatClient = ChatCache.getChatClient().get(clientid);
+        ChatServer chatServer = ChatCache.getChatServer().get(chatClient.getServerID());
+
+        chatServer.getParticipants().remove(userid);
+        chatClient.setParticipant(null);
+
+        return Response.ok("Exit ChatRoom done").build();
+    }
+
+    @POST
+    @Path("sendMessage")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendMessage(
-        @PathParam("serverid") UUID serverid,
-        @PathParam("clientid") UUID clientid,
+        @FormParam("clientid") UUID clientid,
         @FormParam("content") String content) {
 
         try {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,8 +18,7 @@ import prj.serenasimon.cache.ChatCache;
 public class ChatServer implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(ChatServer.class);
-    private static final int SERVER_TIME_OUT = 10 * 1000; // in milliseconds
-    private static final int CLIENT_TIME_OUT = 10 * 1000; // in milliseconds
+    private static final int SERVER_TIME_OUT = 10 * 60 * 1000; // in milliseconds
 
     private UUID serverID;
     private int port;
@@ -75,25 +75,28 @@ public class ChatServer implements Runnable {
                 Socket clientSocket = serverSocket.accept();
                 logger.info("Current Client: {}.{}", clientSocket.getLocalAddress(), clientSocket.getLocalPort());
 
-                Conversation conversation = new Conversation(getServerID(), clientSocket);
+                Conversation conversation = new Conversation(getServerID(), clientSocket, participants);
                 conversation.launch();
 
                 ChatCache.getConversations().put(getServerID(), conversation);
             } catch (SocketTimeoutException e) {
-                e.printStackTrace();
+                // e.printStackTrace();
                 logger.warn("Server Socket Timeout reached...");
-                break;
-                // if (getParticipants().size() < 1) {
                 // break;
-                // } else {
-                // try {
-                // serverSocket.setSoTimeout(SERVER_TIME_OUT);
-                // continue;
-                // } catch (SocketException e1) {
-                // e1.printStackTrace();
-                // break;
-                // }
-                // }
+                if (getParticipants().size() < 1) {
+                    logger.info("No participant in room, terminated...");
+                    ChatCache.getChatServer().remove(getServerID());
+                    break;
+                } else {
+                    try {
+                        logger.info("Extends Timeout: {}s", SERVER_TIME_OUT / 1000);
+                        serverSocket.setSoTimeout(SERVER_TIME_OUT);
+                        continue;
+                    } catch (SocketException e1) {
+                        e1.printStackTrace();
+                        break;
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 break;

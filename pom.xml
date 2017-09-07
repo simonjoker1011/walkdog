@@ -91,6 +91,12 @@
 		    <artifactId>json</artifactId>
 		    <version>20160810</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-lang/commons-lang -->
+		<dependency>
+		    <groupId>commons-lang</groupId>
+		    <artifactId>commons-lang</artifactId>
+		    <version>2.6</version>
+		</dependency>
     </dependencies>
     <properties>
         <jersey.version>2.26-b08</jersey.version>

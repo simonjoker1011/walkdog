@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
+
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
 import prj.serenasimon.socket.Conversation;
@@ -48,4 +50,15 @@ public class ChatCache {
         ChatCache.conversations = conversations;
     }
 
+    public static String getChatServerIDs() {
+        return StringUtils.join(chatServer.keySet(), ",");
+    }
+
+    public static String getChatClientIDs() {
+        return StringUtils.join(chatClient.keySet(), ",");
+    }
+
+    public static String getConversationIDs() {
+        return StringUtils.join(conversations.keySet(), ",");
+    }
 }

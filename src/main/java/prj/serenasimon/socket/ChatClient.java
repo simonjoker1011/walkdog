@@ -22,26 +22,21 @@ public class ChatClient {
     private int port;
     private String participant;
 
-    public ChatClient(ChatServer server) throws IOException {
+    public ChatClient(ChatServer server, String userid) throws IOException {
 
         setClientID(UUID.randomUUID());
         setServerID(server.getServerID());
         setPort(server.getPort());
         setAddr(server.getAddr());
-
+        setParticipant(userid);
         setSocket(new Socket(addr, port));
-        logger.info("connect to server/client: {}/{}", serverID, clientID);
+
+        logger.info("Current client: {}", clientID);
+        logger.info("Connect to server: {}", serverID);
         logger.info("getInetAddress: {}, getLocalAddress: {}, getPort: {}", getSocket().getInetAddress(), getSocket().getLocalAddress(), getSocket().getPort());
 
         ChatCache.getChatClient().put(getClientID(), this);
     }
-
-    // public void launchConversation() {
-    // Conversation conversation = new Conversation(getServerID(), clientSocket);
-    // conversation.launch();
-    //
-    // ChatCache.getConversations().put(conversation.getConversationID(), conversation);
-    // }
 
     public void sendMessage(String content) throws IOException {
         DataOutputStream s = new DataOutputStream(getSocket().getOutputStream());
@@ -100,5 +95,9 @@ public class ChatClient {
 
     public void setSocket(Socket socket) {
         this.socket = socket;
+    }
+
+    public String getConnInfo() {
+        return getServerID().toString() + ", " + getClientID() + ", " + getParticipant();
     }
 }

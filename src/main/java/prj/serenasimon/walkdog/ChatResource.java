@@ -14,11 +14,13 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import prj.serenasimon.cache.ChatCache;
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
+import prj.serenasimon.socket.Conversation;
 
 @Path("chat")
 public class ChatResource {
@@ -41,8 +43,7 @@ public class ChatResource {
         server.getParticipants().add(userid);
         server.launch();
 
-        ChatClient client = new ChatClient(server);
-        client.setParticipant(userid);
+        ChatClient client = new ChatClient(server, userid);
 
         String JsonResponse = new JSONObject()
             .put("serverid", server.getServerID())
@@ -66,8 +67,7 @@ public class ChatResource {
         ChatServer server = ChatCache.getChatServer().get(chatroomid);
         server.getParticipants().add(userid);
 
-        ChatClient client = new ChatClient(server);
-        client.setParticipant(userid);
+        ChatClient client = new ChatClient(server, userid);
 
         String JsonResponse = new JSONObject()
             .put("serverid", server.getServerID())
@@ -96,9 +96,13 @@ public class ChatResource {
 
         ChatClient chatClient = ChatCache.getChatClient().get(clientid);
         ChatServer chatServer = ChatCache.getChatServer().get(chatClient.getServerID());
+        Conversation conversation = ChatCache.getConversations().get(chatServer.getServerID());
 
         chatServer.getParticipants().remove(userid);
         chatClient.setParticipant(null);
+        conversation.getParticipants().remove(userid);
+
+        ChatCache.getChatClient().remove(chatClient.getClientID());
 
         return Response.ok("Exit ChatRoom done").build();
     }
@@ -114,12 +118,28 @@ public class ChatResource {
         try {
             ChatCache.getChatClient().get(clientid).sendMessage(content);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
             return Response.serverError().build();
         }
-        ;
 
         return Response.ok(content).build();
+    }
+
+    @GET
+    @Path("cacheStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sendMessage() {
+
+        String JsonResponse = new JSONObject()
+            .put("servers", ChatCache.getChatServer().keySet())
+            .put("client", ChatCache.getChatClient().keySet())
+            .put("connection size", ChatCache.getConversations().size())
+            .put("connections", new JSONArray(
+                ChatCache.getChatClient().entrySet().stream()
+                    .map(e -> e.getValue().getConnInfo())
+                    .toArray()))
+            .toString();
+
+        return Response.ok(JsonResponse).build();
     }
 }

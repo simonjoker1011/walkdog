@@ -1,10 +1,10 @@
 package prj.serenasimon.cache;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.apache.commons.lang.StringUtils;
+import java.util.stream.Collectors;
 
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
@@ -50,15 +50,16 @@ public class ChatCache {
         ChatCache.conversations = conversations;
     }
 
-    public static String getChatServerIDs() {
-        return StringUtils.join(chatServer.keySet(), ",");
+    public static ArrayList<ChatServer> getServerByUserID(String userid) {
+        return (ArrayList<ChatServer>) chatServer.values().stream()
+            .filter(s -> s.getParticipants().contains(userid))
+            .collect(Collectors.toList());
     }
 
-    public static String getChatClientIDs() {
-        return StringUtils.join(chatClient.keySet(), ",");
-    }
+    public static ArrayList<ChatClient> getClientByUserID(String userid) {
+        return (ArrayList<ChatClient>) chatClient.values().stream()
+            .filter(s -> s.getParticipant().contains(userid))
+            .collect(Collectors.toList());
 
-    public static String getConversationIDs() {
-        return StringUtils.join(conversations.keySet(), ",");
     }
 }

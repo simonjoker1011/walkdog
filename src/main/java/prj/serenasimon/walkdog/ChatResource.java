@@ -1,6 +1,7 @@
 package prj.serenasimon.walkdog;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import javax.ws.rs.Consumes;
@@ -21,6 +22,7 @@ import prj.serenasimon.cache.ChatCache;
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
 import prj.serenasimon.socket.Conversation;
+import prj.serenasimon.util.JsonResponse;
 
 @Path("chat")
 public class ChatResource {
@@ -44,6 +46,7 @@ public class ChatResource {
         server.launch();
 
         ChatClient client = new ChatClient(server, userid);
+        server.getClientIDs().add(client.getClientID());
 
         String JsonResponse = new JSONObject()
             .put("serverid", server.getServerID())
@@ -91,20 +94,45 @@ public class ChatResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     public Response exitChatroom(
-        @FormParam("clientid") UUID clientid,
+        @FormParam("chatroomid") UUID chatroomid,
         @FormParam("userid") String userid) {
 
-        ChatClient chatClient = ChatCache.getChatClient().get(clientid);
-        ChatServer chatServer = ChatCache.getChatServer().get(chatClient.getServerID());
+        ChatServer chatServer = ChatCache.getChatServer().get(chatroomid);
         Conversation conversation = ChatCache.getConversations().get(chatServer.getServerID());
 
         chatServer.getParticipants().remove(userid);
-        chatClient.setParticipant(null);
         conversation.getParticipants().remove(userid);
 
-        ChatCache.getChatClient().remove(chatClient.getClientID());
+        ArrayList<ChatClient> clients = ChatCache.getClientByUserID(userid);
+        for (ChatClient chatClient : clients) {
+            chatClient.setParticipant(null);
+            ChatCache.getChatClient().remove(chatClient.getClientID());
+        }
 
-        return Response.ok("Exit ChatRoom done").build();
+        return Response.ok(JsonResponse.generalJsonResponse("Exit Chatroom done")).build();
+    }
+
+    @POST
+    @Path("exitAllChatroom")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response exitAllChatroom(
+        @FormParam("userid") String userid) {
+
+        ArrayList<ChatServer> servers = ChatCache.getServerByUserID(userid);
+        ArrayList<ChatClient> clients = ChatCache.getClientByUserID(userid);
+
+        for (ChatServer chatServer : servers) {
+            chatServer.getParticipants().remove(userid);
+            ChatCache.getConversations().get(chatServer.getServerID()).getParticipants().remove(userid);
+        }
+
+        for (ChatClient chatClient : clients) {
+            chatClient.setParticipant(null);
+            ChatCache.getChatClient().remove(chatClient.getClientID());
+        }
+
+        return Response.ok(JsonResponse.generalJsonResponse("Exit All ChatRooms done")).build();
     }
 
     @POST

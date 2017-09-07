@@ -16,7 +16,7 @@ import prj.serenasimon.cache.ChatCache;
 public class Conversation implements Runnable {
 
     private static final Logger logger = LogManager.getLogger(Conversation.class);
-    private static final int CLIENT_TIME_OUT = 10 * 60 * 1000; // in milliseconds
+    private static final int CLIENT_TIME_OUT = 1 * 60 * 1000; // in milliseconds
 
     private UUID serverID;
     private Set<String> participants;
@@ -44,12 +44,12 @@ public class Conversation implements Runnable {
             } catch (SocketTimeoutException e) {
                 logger.warn("Client Socket Timeout reached...");
                 if (getParticipants().size() < 1) {
-                    logger.info("No participant in room, terminated...");
+                    logger.info("No participant in conversation [ {} ], terminated...", getServerID());
                     ChatCache.getConversations().remove(getServerID());
                     break;
                 } else {
                     try {
-                        logger.info("Extends Timeout: {}s", CLIENT_TIME_OUT / 1000);
+                        logger.info("Extends Timeout: {} s", CLIENT_TIME_OUT / 1000);
                         clientSocket.setSoTimeout(CLIENT_TIME_OUT);
                         continue;
                     } catch (SocketException e1) {

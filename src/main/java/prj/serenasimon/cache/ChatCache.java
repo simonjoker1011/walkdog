@@ -2,9 +2,12 @@ package prj.serenasimon.cache;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.websocket.Session;
 
 import prj.serenasimon.socket.ChatClient;
 import prj.serenasimon.socket.ChatServer;
@@ -15,6 +18,7 @@ public class ChatCache {
     private static volatile Map<UUID, ChatServer> chatServer;
     private static volatile Map<UUID, ChatClient> chatClient;
     private static volatile Map<UUID, Conversation> conversations;
+    private static volatile Map<String, List<Session>> chatSessions;
 
     static {
         initCache();
@@ -24,6 +28,7 @@ public class ChatCache {
         setChatServer(new HashMap<UUID, ChatServer>());
         setChatClient(new HashMap<UUID, ChatClient>());
         setConversations(new HashMap<UUID, Conversation>());
+        setChatSessions(new HashMap<String, List<Session>>());
     }
 
     public static Map<UUID, ChatServer> getChatServer() {
@@ -61,5 +66,13 @@ public class ChatCache {
             .filter(s -> s.getParticipant().contains(userid))
             .collect(Collectors.toList());
 
+    }
+
+    public static Map<String, List<Session>> getChatSessions() {
+        return chatSessions;
+    }
+
+    public static void setChatSessions(Map<String, List<Session>> chatSessions) {
+        ChatCache.chatSessions = chatSessions;
     }
 }

@@ -9,9 +9,13 @@ import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
 import javax.websocket.EndpointConfig;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import prj.serenasimon.datas.ChatMessage;
 
 public class ChatMessageDecoder implements Decoder.Text<ChatMessage> {
+    private static final Logger logger = LogManager.getLogger(ChatMessageDecoder.class);
 
     @Override
     public void destroy() {

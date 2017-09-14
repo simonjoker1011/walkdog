@@ -5,9 +5,13 @@ import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import prj.serenasimon.datas.ChatMessage;
 
 public class ChatMessageEncoder implements Encoder.Text<ChatMessage> {
+    private static final Logger logger = LogManager.getLogger(ChatMessageEncoder.class);
 
     @Override
     public void destroy() {

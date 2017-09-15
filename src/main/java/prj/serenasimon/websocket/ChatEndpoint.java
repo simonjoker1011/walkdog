@@ -24,7 +24,7 @@ public class ChatEndpoint {
 
     @OnOpen
     public void open(Session session, @PathParam("room") final String room) {
-        logger.info("ws opened; room: {}", room);
+        logger.info("ws opened; session: {}, room: {}", session.getId(), room);
 
         session.getUserProperties().put("room", room);
         ChatCache.addChatSessions(session);
@@ -32,14 +32,14 @@ public class ChatEndpoint {
 
     @OnClose
     public void close(final Session session) {
-        logger.info("ws closed; room: {}", session.getUserProperties().get("room"));
+        logger.info("ws closed; session: {}, room: {}", session.getId(), session.getUserProperties().get("room"));
         ChatCache.removeChatSessions(session);
     }
 
     @OnMessage
     public void onMessage(final Session session, final ChatMessage chatMessage) {
         for (Session client : ChatCache.getChatSessions().get(session.getUserProperties().get("room"))) {
-            if (!client.equals(session)) {
+            if (client.isOpen() && !client.equals(session)) {
                 try {
                     client.getBasicRemote().sendObject(chatMessage);
                 } catch (IOException | EncodeException e) {

@@ -1,6 +1,5 @@
 package prj.serenasimon.walkdog;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.ws.rs.Consumes;
@@ -16,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import prj.serenasimon.datas.User;
+import prj.serenasimon.util.HibernateUtil;
 
 @Path("user")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -41,14 +41,19 @@ public class UserResource {
         @FormParam("link") String link,
         @FormParam("picture") String picture) {
 
-        logger.info("\n ID: {} \n Name: {} \n Firstname: {} \n Lastname: {} \n Agerange: {}, \n Link: {} \n Picture: {}", id, name, firstname, lastname, agerange, link, picture);
-        // System.out.println(id + "\n " + name + "\n " + firstname + "\n " + lastname + "\n " + agerange + "\n " + link + "\n "
-        // + picture + "\n ");
-
-        User user = new User();
+        logger.info("\n ID: {} \n Name: {} \n Firstname: {} \n Lastname: {} \n Agerange: {}, \n Link: {} \n Picture: {}",
+            id, name, firstname, lastname, agerange, link, picture);
+        User user = null;
         try {
-            user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture));
-        } catch (MalformedURLException e) {
+            user = (User) HibernateUtil.basicReadById(User.class, id);
+            logger.info("{} logging in...", name);
+            if (user == null) {
+                logger.info("New user: {}, id: {}", name, id);
+                user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture));
+                HibernateUtil.basicCreate(user);
+            }
+
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }

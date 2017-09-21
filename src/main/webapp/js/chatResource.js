@@ -1,5 +1,5 @@
   var host='http://localhost:8081/walkdog';
-  var userApiPrefix='/p1/chat';
+  var chatApiPrefix='/p1/chat';
 
     $(function() {
         $("#chatbox").on("submit", function(e) {

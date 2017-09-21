@@ -5,6 +5,7 @@ import java.net.URL;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
@@ -14,6 +15,7 @@ public class User implements Serializable {
 
     final static public String EntityName = "User";
 
+    @Id
     @Column(name = "id")
     private Long id;
     @Column(name = "name")

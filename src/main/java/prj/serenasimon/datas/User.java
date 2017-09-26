@@ -101,4 +101,21 @@ public class User implements Serializable {
         this.picture = picture;
     }
 
+    @Override
+    public boolean equals(Object user) {
+        if (user == null)
+            return false;
+        if (user == this)
+            return true;
+        if (!(user instanceof User))
+            return false;
+        User inputUser = (User) user;
+        return inputUser.getId() == getId()
+            && inputUser.getName() == getName()
+            && inputUser.getFirstname() == getFirstname()
+            && inputUser.getLastname() == getLastname()
+            && inputUser.getAgerange() == getAgerange()
+            && inputUser.getPicture() == getPicture()
+            && inputUser.getLink() == getLink();
+    }
 }

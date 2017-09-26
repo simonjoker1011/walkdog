@@ -1,7 +1,10 @@
 package prj.serenasimon.walkdog;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Map.Entry;
 
+import javax.websocket.Session;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -13,7 +16,10 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import prj.serenasimon.cache.ChatCache;
 import prj.serenasimon.datas.User;
 import prj.serenasimon.util.HibernateUtil;
 
@@ -24,9 +30,17 @@ public class UserResource {
     private static final Logger logger = LogManager.getLogger(UserResource.class);
 
     @GET
+    @Path("online")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getIt() {
-        return Response.ok("OKOK").build();
+    public Response getCacheInfo() {
+        JSONObject jsonObject = new JSONObject();
+
+        for (Entry<Long, Session> entry : ChatCache.getOnlineUsers().entrySet()) {
+            ArrayList<Long> receivers = (ArrayList<Long>) entry.getValue().getUserProperties().get("reveivers");
+            jsonObject.put(entry.getKey().toString(), new JSONArray(receivers.toArray()));
+
+        }
+        return Response.ok(jsonObject.toString()).build();
     }
 
     @POST
@@ -47,6 +61,7 @@ public class UserResource {
         try {
             user = (User) HibernateUtil.basicReadById(User.class, id);
             logger.info("{} logging in...", name);
+
             if (user == null) {
                 logger.info("New user: {}, id: {}", name, id);
                 user = new User(id, name, firstname, lastname, agerange, new URL(link), new URL(picture));
@@ -60,4 +75,5 @@ public class UserResource {
 
         return Response.ok(user).build();
     }
+
 }

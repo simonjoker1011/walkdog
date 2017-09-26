@@ -1,6 +1,8 @@
 
   var host='http://localhost:8081/walkdog';
   var userApiPrefix='/p1/user';
+  var wsocket;
+  var serviceLocation = "ws://localhost:8081/walkdog/chat/user/";
 
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
@@ -46,11 +48,7 @@
             FB.logout(function(response) {
               statusChangeCallback(response);
             });
-
-            FB.api('/me',{fields: 'id,cover,name,first_name,last_name,age_range,link,email,picture,updated_time'}, function(response) {
-              console.log(response);
-            });
-
+            wsocket.close();
           }else{
             console.log('start to login');
 
@@ -77,6 +75,7 @@
                   dataType: 'json'
                 }).responseJSON;
 
+                wsocket = new WebSocket(serviceLocation + response.id);
                 console.log(resp);
               });
             });

@@ -8,14 +8,24 @@ import javax.websocket.Session;
 
 public class ChatCache {
 
+    // <roomID, sessions>
     private static volatile HashMap<String, ArrayList<Session>> chatSessions;
-
+    private static volatile HashMap<Long, Session> onlineUsers;
     static {
         initCache();
     }
 
     private static void initCache() {
         setChatSessions(new HashMap<String, ArrayList<Session>>());
+        setOnlineUsers(new HashMap<Long, Session>());
+    }
+
+    public static HashMap<Long, Session> getOnlineUsers() {
+        return onlineUsers;
+    }
+
+    public static void setOnlineUsers(HashMap<Long, Session> onlineUsers) {
+        ChatCache.onlineUsers = onlineUsers;
     }
 
     public static HashMap<String, ArrayList<Session>> getChatSessions() {

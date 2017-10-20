@@ -23,13 +23,27 @@ import prj.serenasimon.cache.ChatCache;
 public class ChatResource {
     private static final Logger logger = LogManager.getLogger(ChatResource.class);
 
+    // @GET
+    // @Produces(MediaType.APPLICATION_JSON)
+    // public Response getChatInfo() {
+    // JSONObject jsonObject = new JSONObject();
+    // for (Entry<String, ArrayList<Session>> entry : ChatCache.getChatSessions().entrySet()) {
+    // jsonObject.put(entry.getKey(), new JSONArray(
+    // entry.getValue().stream().map(s -> s.getId()).toArray()));
+    // }
+    // return Response.ok(jsonObject.toString()).build();
+    // }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCacheInfo() {
+    public Response getOnlineUserInfo() {
         JSONObject jsonObject = new JSONObject();
-        for (Entry<String, ArrayList<Session>> entry : ChatCache.getChatSessions().entrySet()) {
-            jsonObject.put(entry.getKey(), new JSONArray(
-                entry.getValue().stream().map(s -> s.getId()).toArray()));
+        for (Entry<Long, Session> entry : ChatCache.getOnlineUsers().entrySet()) {
+            if (((ArrayList<Long>) entry.getValue().getUserProperties().get("reveivers")).size() == 0) {
+                jsonObject.put(entry.getKey().toString(), "");
+            } else {
+                jsonObject.put(entry.getKey().toString(), new JSONArray(entry.getValue().getUserProperties().get("reveivers")));
+            }
         }
         return Response.ok(jsonObject.toString()).build();
     }

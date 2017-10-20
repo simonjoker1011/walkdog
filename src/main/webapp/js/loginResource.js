@@ -3,6 +3,7 @@
   var userApiPrefix='/p1/user';
   var wsocket;
   var serviceLocation = "ws://localhost:8081/walkdog/chat/user/";
+  var onlineUserList={};
 
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
@@ -75,11 +76,13 @@
                   dataType: 'json'
                 }).responseJSON;
 
-                wsocket = new WebSocket(serviceLocation + response.id);
                 console.log(resp);
+
+                wsocket = new WebSocket(serviceLocation + response.id);
+                wsocket.onmessage = onMessageReceived;
+                
               });
             });
-
 
 
           };

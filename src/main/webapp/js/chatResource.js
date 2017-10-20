@@ -1,78 +1,59 @@
   var host='http://localhost:8081/walkdog';
   var chatApiPrefix='/p1/chat';
 
-    $(function() {
-        $("#chatbox").on("submit", function(e) {
-          console.log("input: " + document.getElementById("dialog").value);
-          document.getElementById("dialog").value=null;
-            e.preventDefault();
-            // $.ajax({
-            //     url: $(this).attr("action"),
-            //     type: 'POST',
-            //     data: $(this).serialize(),
-            //     beforeSend: function() {
-            //         $("#message").html("sending...");
-            //     },
-            //     success: function(data) {
-            //         $("#message").hide();
-            //         $("#response").html(data);
-            //     }
-            // });
-        });
-    });
+    function onMessageReceived(evt) {
+       
+        var msg = JSON.parse(evt.data); // native API
+        console.log(msg);
 
-    function createChatroom(){
-        FB.getLoginStatus(function(response){
-        
-        var resp = $.ajax({
-                        url: host+userApiPrefix+"/createChatroom",
-                        type: "POST",
-                        data:{
-                            userid: response.authResponse.userID
-                        },
-                        async: false,
-                        contentType: "application/x-www-form-urlencoded",
-                        dataType: 'json'
-                    }).responseJSON;
-        console.log("temp")
-        });
+        switch(msg.action){
+            case "login":
+                onlineUserList[msg.senderid]=msg.senderid;
+                $("#onlinestatus")[0].innerHTML=showOnlineUsers();
+                // document.getElementById("onlinestatus").innerHTML = showOnlineUsers();
+                break;
+            case "logout":
+                delete onlineUserList[msg.senderid];
+                $("#onlinestatus")[0].innerHTML=showOnlineUsers();
+                // document.getElementById("onlinestatus").innerHTML = showOnlineUsers();
+                break;
+            case "message":
+                console.log("Received message");
+                break;
+            default:
+
+        }
+        // var $messageLine = $('<tr><td class="received">' + msg.received
+        //         + '</td><td class="user label label-info">' + msg.sender
+        //         + '</td><td class="message badge">' + msg.message
+        //         + '</td></tr>');
+        // $chatWindow.append($messageLine);
     }
 
-    $(function() {
-        
-
-        $("#createChatroom").click(function(){
-            checkLoginState();
-
-            // $.ajax({
-            //     url: host+userApiPrefix+"/createChatroom",
-            //     type: "POST",
-            //     data:{
-            //         userid:
-            //     },
-            //     async: false,
-            //     contentType: "application/x-www-form-urlencoded",
-            //     dataType: 'json'
-            // }).responseJSON;
+    $(document).ready(function() {
+        $('#chatbox').submit(function(evt) {
+            evt.preventDefault();
+            doSendMessage($('#message')[0].value,$('#receiver')[0].value);
+            $('#message')[0].value='';                        
         });
     });
 
-    $(function() {
-        $("#createChatrrom").on("submit", function(e) {
-          console.log("input: " + document.getElementById("dialog").value);
-          document.getElementById("dialog").value=null;
-            e.preventDefault();
-            // $.ajax({
-            //     url: $(this).attr("action"),
-            //     type: 'POST',
-            //     data: $(this).serialize(),
-            //     beforeSend: function() {
-            //         $("#message").html("sending...");
-            //     },
-            //     success: function(data) {
-            //         $("#message").hide();
-            //         $("#response").html(data);
-            //     }
-            // });
-        });
-    });
+    function showOnlineUsers(){
+        var onlineusers="";
+        for(var i in onlineUserList){
+            onlineusers+=(i+"<br>")
+        }
+        return onlineusers;
+    }
+
+    function doSendMessage(msg, receiver){
+        var msg = '{"message":"' + msg + '",'+
+                    '"senderid":"'  + '",'+
+                    '"reveiverid":"'+ receiver +'",'+
+                    '"received":"'+'",'+
+                    '"action":"message"'+
+                    '}';
+
+        console.log(msg);                    
+        wsocket.send(msg);
+    }

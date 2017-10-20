@@ -14,18 +14,23 @@
 <button onclick="loginlogout()" id="loginlogout"></button>
 <button onclick="checkLoginState()">Check Status</button><br>
 
-<button onclick="createChatroom()" >Create Chat Room</button>
+<table style="border: 1px solid black">
+	<th style="border: 1px solid black">
+		 Who's online 
+	</th>
+	<tr>
+		<td id="onlinestatus"></td>
+	</tr>
+</table>
 
-<form id="joinChatrrom">
-<input type="submit" value="Join Chat Room">
-<input type="text" id="chatroomid">
-</form>
+<div>
 
-<button onclick="exitChatrrom()" id="exitChatrrom">Exit Chat Room</button>
+</div>
 
-<form id="chatbox">
-<input type="text" id="dialog">
-<input type="submit" value="Send">
+<form id="chatbox" style="bottom: 0; position: absolute;">
+	<input type="text" id="message" placeholder="Your message..."/>
+	<input type="text" id="receiver" placeholder="Receiver"/>
+	<input type="submit" id="doSendMsg" value="Send" />
 </form>
 
 

@@ -1,5 +1,6 @@
   var host='http://localhost:8081/walkdog';
   var chatApiPrefix='/p1/chat';
+var chatcontent='';
 
     function onMessageReceived(evt) {
        
@@ -19,15 +20,12 @@
                 break;
             case "message":
                 console.log("Received message");
+                $('#chatwindow').append("<tr><td>"+msg.senderid+": </td><td>"+msg.message+"</td></tr>");
+                window.scrollTo(0,document.body.scrollHeight);
                 break;
             default:
 
         }
-        // var $messageLine = $('<tr><td class="received">' + msg.received
-        //         + '</td><td class="user label label-info">' + msg.sender
-        //         + '</td><td class="message badge">' + msg.message
-        //         + '</td></tr>');
-        // $chatWindow.append($messageLine);
     }
 
     $(document).ready(function() {
@@ -47,13 +45,17 @@
     }
 
     function doSendMessage(msg, receiver){
-        var msg = '{"message":"' + msg + '",'+
+        var tomsg = '{"message":"' + msg + '",'+
                     '"senderid":"'  + '",'+
                     '"reveiverid":"'+ receiver +'",'+
                     '"received":"'+'",'+
                     '"action":"message"'+
                     '}';
 
-        console.log(msg);                    
-        wsocket.send(msg);
+        console.log(tomsg);                 
+
+        $('#chatwindow').append("<tr><td>Me: </td><td>"+msg+"</td></tr>");
+        window.scrollTo(0,document.body.scrollHeight);
+
+        wsocket.send(tomsg);
     }

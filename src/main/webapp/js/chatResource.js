@@ -5,21 +5,17 @@ var chatcontent='';
     function onMessageReceived(evt) {
        
         var msg = JSON.parse(evt.data); // native API
-        console.log(msg);
 
         switch(msg.action){
             case "login":
-                onlineUserList[msg.senderid]=msg.senderid;
+                onlineUserList.push(msg.senderid);
                 $("#onlinestatus")[0].innerHTML=showOnlineUsers();
-                // document.getElementById("onlinestatus").innerHTML = showOnlineUsers();
                 break;
             case "logout":
-                delete onlineUserList[msg.senderid];
+                onlineUserList.pop(msg.senderid);
                 $("#onlinestatus")[0].innerHTML=showOnlineUsers();
-                // document.getElementById("onlinestatus").innerHTML = showOnlineUsers();
                 break;
             case "message":
-                console.log("Received message");
                 $('#chatwindow').append("<tr><td>"+msg.senderid+": </td><td>"+msg.message+"</td></tr>");
                 window.scrollTo(0,document.body.scrollHeight);
                 break;
@@ -38,9 +34,12 @@ var chatcontent='';
 
     function showOnlineUsers(){
         var onlineusers="";
-        for(var i in onlineUserList){
-            onlineusers+=(i+"<br>")
+        if(onlineUserList.length>0){
+            for(var i in onlineUserList){
+                onlineusers+=("<button>"+onlineUserList[i]+"</button><br>")
+            }
         }
+        
         return onlineusers;
     }
 
@@ -51,9 +50,6 @@ var chatcontent='';
                     '"received":"'+'",'+
                     '"action":"message"'+
                     '}';
-
-        console.log(tomsg);                 
-
         $('#chatwindow').append("<tr><td>Me: </td><td>"+msg+"</td></tr>");
         window.scrollTo(0,document.body.scrollHeight);
 

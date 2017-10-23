@@ -1,10 +1,7 @@
 package prj.serenasimon.walkdog;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Map.Entry;
 
-import javax.websocket.Session;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -32,14 +29,16 @@ public class UserResource {
     @GET
     @Path("online")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCacheInfo() {
+    public Response getOnlineUsers() {
+
         JSONObject jsonObject = new JSONObject();
+        jsonObject.put("online", new JSONArray(ChatCache.getOnlineUsers().keySet()));
+        // for (Long userid : ChatCache.getOnlineUsers().keySet()) {
+        // ArrayList<Long> receivers = (ArrayList<Long>) entry.getValue().getUserProperties().get("reveivers");
+        // jsonObject.put(entry.getKey().toString(), new JSONArray(receivers.toArray()));
+        //
+        // }
 
-        for (Entry<Long, Session> entry : ChatCache.getOnlineUsers().entrySet()) {
-            ArrayList<Long> receivers = (ArrayList<Long>) entry.getValue().getUserProperties().get("reveivers");
-            jsonObject.put(entry.getKey().toString(), new JSONArray(receivers.toArray()));
-
-        }
         return Response.ok(jsonObject.toString()).build();
     }
 

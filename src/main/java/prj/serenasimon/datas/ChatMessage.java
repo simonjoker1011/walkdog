@@ -60,4 +60,9 @@ public class ChatMessage {
         this.reveiverid = reveiverid;
     }
 
+    @Override
+    public String toString() {
+        return String.format("From: %s, To: %s, Msg: %s", getSenderid(), getReveiverid(), getMessage());
+    }
+
 }

@@ -79,6 +79,7 @@ public class P2pEndpoint {
         Session target = ChatCache.getOnlineUsers().get(Long.parseLong(chatMessage.getReveiverid()));
         if (target.isOpen() && !target.equals(session)) {
             try {
+                logger.info(chatMessage.toString());
                 target.getBasicRemote().sendObject(chatMessage);
             } catch (IOException | EncodeException e) {
                 // TODO Auto-generated catch block

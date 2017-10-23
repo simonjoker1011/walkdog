@@ -4,6 +4,7 @@
   var wsocket;
   var serviceLocation = "ws://localhost:8081/walkdog/chat/user/";
   var onlineUserList=[];
+  var myid;
 
   function statusChangeCallback(response) {
     if (response.status === 'connected') {
@@ -64,6 +65,7 @@
                 wsocket.onmessage = onMessageReceived;
                 
                 getOnlineUsers(response.id);
+                myid=response.id;
               });
             });
           };
